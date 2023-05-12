@@ -20,14 +20,12 @@ def main():
             resps = gurl.parse_curl_trace(f.read())
             for res in resps:
                 print(json.dumps(res))
+    elif std_input := sys.stdin.buffer.read():
+        resps = gurl.parse_curl_trace(std_input)
+        for res in resps:
+            print(json.dumps(res))
     else:
-        std_input = sys.stdin.buffer.read()
-        if std_input:
-            resps = gurl.parse_curl_trace(std_input)
-            for res in resps:
-                print(json.dumps(res))
-        else:
-            sys.stderr.write("No input, please use stdin of -f to provide")
+        sys.stderr.write("No input, please use stdin of -f to provide")
 
 
 if __name__ == '__main__':

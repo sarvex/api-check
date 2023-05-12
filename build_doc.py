@@ -67,7 +67,7 @@ def main():
                 continue
 
             # Check that META contains all needed keys
-            if not all(x in meta.keys() for x in META_KEYS):
+            if any(x not in meta for x in META_KEYS):
                 print(f"[!] Missing keys in META \"{d}\". "
                       f"Needed keys: \"{', '.join(META_KEYS)}\"")
                 exit(1)
@@ -86,10 +86,9 @@ def main():
             author = meta["author"]
             description = meta["description"]
             display_name = meta.get("display-name", "") or tool_name
-            short_command = meta.get("short-command", None)
             tool_type = 'edge' if is_edge_tool else 'apicheck'
 
-            if short_command:
+            if short_command := meta.get("short-command", None):
                 if short_command in short_commands:
                     print(f"[!] Short-command \"{short_command}\" at tool "
                           f"'{tool_name}' already exits in another tool")
@@ -148,14 +147,17 @@ def main():
     for t_name, (
             t_brief, t_author, t_home_page, display_name, tool_type
     ) in tools_brief.items():
-        tool_menu_item.append(f"  - title: {display_name}")
-        tool_menu_item.append(f"    author: {t_author}")
-        tool_menu_item.append(f"    home: {t_home_page}")
-        tool_menu_item.append(f"    brief: {t_brief}")
-        tool_menu_item.append(f"    type: {tool_type}")
-        tool_menu_item.append(f"    url: /tools/{tool_type}/{t_name}")
-        tool_menu_item.append("")
-
+        tool_menu_item.extend(
+            (
+                f"  - title: {display_name}",
+                f"    author: {t_author}",
+                f"    home: {t_home_page}",
+                f"    brief: {t_brief}",
+                f"    type: {tool_type}",
+                f"    url: /tools/{tool_type}/{t_name}",
+                "",
+            )
+        )
     #
     # Build Menu
     #

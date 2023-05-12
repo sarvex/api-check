@@ -14,7 +14,7 @@ class RequestResponseCallbacks:
     def on_header(self, name: bytes, value: bytes):
         key = name.decode("utf-8")
         val = value.decode("utf-8")
-        if not "headers" in self.data:
+        if "headers" not in self.data:
             self.data["headers"] = {}
         if key in self.data["headers"] and self.data["headers"][key].__class__.__name__ == "list":
             l = self.data["headers"][key]

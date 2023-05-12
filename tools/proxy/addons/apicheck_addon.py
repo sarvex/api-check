@@ -9,8 +9,6 @@ def to_apicheck_format(flow: http.HTTPFlow, is_error: bool = False) -> str:
     _request = flow.request
     _response = flow.response
 
-    data = {}
-
     scheme = f"{_request.scheme}:" if _request.scheme else ""
     url = f"{scheme}//{_request.host}:{_request.port}{_request.path or ''}"
 
@@ -19,14 +17,15 @@ def to_apicheck_format(flow: http.HTTPFlow, is_error: bool = False) -> str:
     else:
         request_content: bytes = _request.text.encode("UTF-8")
 
-    data["request"] = {
-        "url": url,
-        "method": _request.method,
-        "version": _request.http_version,
-        "headers": dict(_request.headers),
-        "body": base64.b64encode(request_content).decode("UTF-8"),
+    data = {
+        "request": {
+            "url": url,
+            "method": _request.method,
+            "version": _request.http_version,
+            "headers": dict(_request.headers),
+            "body": base64.b64encode(request_content).decode("UTF-8"),
+        }
     }
-
     if _response:
 
         if getattr(_response, "content", None):

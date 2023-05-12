@@ -20,7 +20,7 @@ NAME_FORMAT_REGEX = r"([A-Za_-z0-9]+)"
 
 
 def main():
-    docker_images = dict()
+    docker_images = {}
 
     #
     # Getting README from plugin
@@ -48,7 +48,7 @@ def main():
                     meta = dict(cf["DEFAULT"])
 
                     # Check that META contains all needed keys
-                    if not all(x in meta.keys() for x in META_KEYS):
+                    if any(x not in meta for x in META_KEYS):
                         print(f"[!] Missing keys in META \"{d}\". "
                               f"Needed keys: \"{', '.join(META_KEYS)}\"",
                               file=sys.stderr)
@@ -77,7 +77,7 @@ def main():
                               file=sys.stderr)
                         continue
 
-                    if name in docker_images.keys():
+                    if name in docker_images:
                         print(f"[!] Tool name '{name}' already exits used "
                               f"for other tool",
                               file=sys.stderr)
@@ -117,14 +117,15 @@ def main():
     #
     # Build Docker commands
     #
-    commands = []
-
-    # Do login
-    commands.append(" ".join([
-        f"cat {password_file}",
-        "|",
-        f"docker login --username {docker_user} --password-stdin"
-    ]))
+    commands = [
+        " ".join(
+            [
+                f"cat {password_file}",
+                "|",
+                f"docker login --username {docker_user} --password-stdin",
+            ]
+        )
+    ]
 
     # Add build command for each image
     for image, (version, docker_file_path, docker_file) in docker_images.items():
@@ -134,19 +135,21 @@ def main():
         commands.append(f"cd {docker_file_path}")
 
         # Docker command
-        commands.append(" ".join([
-            f"docker build",
-            f" -t {DOCKER_HUB_REPO}/{image}:{version}",
-            f" -t {DOCKER_HUB_REPO}/{image}:latest",
-            f" {os.path.dirname(docker_file)}"
-        ]))
+        commands.append(
+            " ".join(
+                [
+                    "docker build",
+                    f" -t {DOCKER_HUB_REPO}/{image}:{version}",
+                    f" -t {DOCKER_HUB_REPO}/{image}:latest",
+                    f" {os.path.dirname(docker_file)}",
+                ]
+            )
+        )
 
         commands.append(f"docker push {DOCKER_HUB_REPO}/{image}:{version}")
-        commands.append(f"docker push {DOCKER_HUB_REPO}/{image}:latest")
-
-        # Go script base path
-        commands.append(f"cd {HERE}")
-
+        commands.extend(
+            (f"docker push {DOCKER_HUB_REPO}/{image}:latest", f"cd {HERE}")
+        )
     # Remove password file
     commands.append(f"rm -rf {password_file}")
 

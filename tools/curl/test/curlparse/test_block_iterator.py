@@ -6,18 +6,18 @@ def test_none():
     inp = None
     res = cp.curl_trace_block_iterator(inp)
 
-    assert len(list(res)) == 0
+    assert not list(res)
 
 
 def test_empty():
     inp = ""
     res = cp.curl_trace_block_iterator(inp)
 
-    assert len(list(res)) == 0
+    assert not list(res)
 
 
 def test_one_of_kind():
-    imp = f"""
+    imp = """
 == Meta info block 1
 == Meta info block 2
 => Send SSL data, 5 bytes (0x5)
@@ -89,7 +89,8 @@ def test_one_of_kind():
 
 
 def test_reqres_block_iterator():
-    imp = bytes(f"""
+    imp = bytes(
+        """
 == Meta info block 1
 == Meta info block 2
 => Send SSL data, 5 bytes (0x5)
@@ -108,7 +109,9 @@ def test_reqres_block_iterator():
 0000: 48 54 54 50 2f 32 20 32 30 30 20 0d 0a          HTTP/2 200 ..
 <= Recv data, 5 bytes (0x5)
 0000: 17 03 03 00 1a                                  .....
-    """, encoding="utf-8")
+    """,
+        encoding="utf-8",
+    )
 
     exp = [
         cp.MetaReqRes(
@@ -152,14 +155,17 @@ def test_reqres_block_iterator():
 
 
 def test_multiline_info():
-    inp = bytes(f"""== Info:   CAfile: /etc/ssl/certs/ca-certificates.crt
+    inp = bytes(
+        """== Info:   CAfile: /etc/ssl/certs/ca-certificates.crt
   CApath: none
 => Send header, 76 bytes (0x4c)
 0000: 47 45 54 20 2f 20 48 54 54 50 2f 32 0d 0a 48 6f GET / HTTP/2..Ho
 0010: 73 74 3a 20 77 77 77 2e 67 6f 6f 67 6c 65 2e 63 st: www.google.c
 0020: 6f 6d 0d 0a 75 73 65 72 2d 61 67 65 6e 74 3a 20 om..user-agent: 
 0030: 63 75 72 6c 2f 37 2e 36 39 2e 31 0d 0a 61 63 63 curl/7.69.1..acc
-0040: 65 70 74 3a 20 2a 2f 2a 0d 0a 0d 0a             ept: */*....""", encoding="utf-8")
+0040: 65 70 74 3a 20 2a 2f 2a 0d 0a 0d 0a             ept: */*....""",
+        encoding="utf-8",
+    )
 
     exp = [
         cp.Block(

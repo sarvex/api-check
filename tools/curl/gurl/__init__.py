@@ -96,26 +96,26 @@ _extract_res = _extract_bin_block_from_multipart(_just_res, _just_data)
 def parse_curl_trace(curl_trace_content):
     if not curl_trace_content:
         return None
-    
+
     log = []
     req = bytearray()
     res = bytearray()
     is_https = False
 
     blocks = cp.curl_trace_block_iterator(curl_trace_content)
-    
+
     for meta_req_res in cp.curl_trace_reqres_iterator(blocks):
         req_bytes = _extract_req(meta_req_res)
         res_bytes = _extract_res(meta_req_res)
 
         reqres = parse_binary(req_bytes, res_bytes)
 
-        if not "_meta" in reqres:
+        if "_meta" not in reqres:
             reqres["_meta"] = {}
         reqres["_meta"]["curl_log"] = meta_req_res.meta
         if is_https:
             reqres["request"]["url"] = f"https://{reqres['request']['url']}"
         else:
             reqres["request"]["url"] = f"http://{reqres['request']['url']}"
-        
+
         yield reqres
